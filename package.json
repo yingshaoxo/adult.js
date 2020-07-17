@@ -1,6 +1,10 @@
 {
   "name": "adult.js",
-  "version": "1.0.0",
+  "version": "1.0.1",
+  "keywords": [
+    "adult",
+    "detection"
+  ],
   "description": "We do a adult detection here.",
   "author": "yingshaoxo",
   "license": "MIT",

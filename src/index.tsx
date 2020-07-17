@@ -1,7 +1,13 @@
 import * as React from 'react'
-import styles from './styles.module.css'
 import * as faceapi from 'face-api.js';
 import { Dialog, Paragraph, Heading } from 'evergreen-ui'
+
+const adultjs_styles = {
+  backgroundColor: "white",
+  width: "100vw",
+  height: "100vh",
+  zIndex: 999999,
+}
 
 interface MirrorProps {
   handle_video_element: (video_element: HTMLVideoElement, canvas_element: HTMLCanvasElement) => void
@@ -161,7 +167,7 @@ class ChildGuard extends React.Component<Props, State> {
     if (this.state.asked == false) {
       return (
         <div
-          className={styles.test}
+          style={adultjs_styles}
         >
           <Dialog
             isShown={!this.state.asked}
@@ -199,7 +205,7 @@ class ChildGuard extends React.Component<Props, State> {
     if (this.state.show && this.state.asked && this.state.agree) {
       return (
         <div
-          className={styles.test}
+          style={adultjs_styles}
         >
           <Mirror
             handle_video_element={this.handle_video_element}
@@ -211,10 +217,10 @@ class ChildGuard extends React.Component<Props, State> {
     if (this.state.show && this.state.asked && !this.state.agree) {
       return (
         <div
-          className={styles.test}
           style={{
             display: "flex",
             justifyContent: "center",
+            ...adultjs_styles
           }}
         >
           <Heading size={900}>Hey, kids! You are not allowed in here!</Heading>

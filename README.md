@@ -17,7 +17,6 @@ yarn add adult.js
 ### Usage
 ```js
 import { ChildGuard } from 'adult.js'
-import 'adult.js/dist/index.css'
 
 const App = () => {
   return (
