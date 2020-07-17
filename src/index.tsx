@@ -1,7 +1,7 @@
 import * as React from 'react'
 import styles from './styles.module.css'
 import * as faceapi from 'face-api.js';
-import { Dialog, Paragraph } from 'evergreen-ui'
+import { Dialog, Paragraph, Heading } from 'evergreen-ui'
 
 interface MirrorProps {
   handle_video_element: (video_element: HTMLVideoElement, canvas_element: HTMLCanvasElement) => void
@@ -122,9 +122,16 @@ class ChildGuard extends React.Component<Props, State> {
       const mean = getMean(this.state.check_age_array)
       const adult = mean > 18 ? true : false
       this.props.callback_function(adult, Math.floor(mean))
-      this.setState({
-        show: false
-      })
+      if (adult) {
+        this.setState({
+          show: false
+        })
+      } else {
+        this.setState({
+          asked: true,
+          agree: false,
+        })
+      }
     }
   }
 
@@ -148,47 +155,48 @@ class ChildGuard extends React.Component<Props, State> {
     console.log("canceled")
 
     this.props.callback_function(false, 0)
-    this.setState({
-      show: false
-    })
   }
 
   render() {
     if (this.state.asked == false) {
       return (
-        <Dialog
-          isShown={!this.state.asked}
-          intent="danger"
-          title="Attention"
-          confirmLabel="Let's do it!"
-          onCloseComplete={() => {
-            this.canceled()
-          }}
-          onCancel={() => {
-            this.canceled()
-          }}
-          onConfirm={() => {
-            this.setState({
-              asked: true,
-              agree: true,
-            })
-            console.log("agreed")
-          }}
+        <div
+          className={styles.test}
         >
-          <Paragraph>
-            We will need to use your camera to do a check to see if you are an adult.
+          <Dialog
+            isShown={!this.state.asked}
+            intent="danger"
+            title="Attention"
+            confirmLabel="Let's do it!"
+            onCloseComplete={() => {
+              this.canceled()
+            }}
+            onCancel={() => {
+              this.canceled()
+            }}
+            onConfirm={() => {
+              this.setState({
+                asked: true,
+                agree: true,
+              })
+              console.log("agreed")
+            }}
+          >
+            <Paragraph>
+              We will need to use your camera to do a check to see if you are an adult.
           </Paragraph>
-          <Paragraph>
-            We won't collect your data, because it's all happened on your browser.
+            <Paragraph>
+              We won't collect your data, because it's all happened on your browser.
           </Paragraph>
-          <Paragraph>
-            Would you willing to go on with this?
+            <Paragraph>
+              Would you willing to go on with this?
           </Paragraph>
-        </Dialog>
+          </Dialog>
+        </div>
       )
     }
 
-    if (this.state.show && this.state.agree) {
+    if (this.state.show && this.state.asked && this.state.agree) {
       return (
         <div
           className={styles.test}
@@ -199,9 +207,22 @@ class ChildGuard extends React.Component<Props, State> {
         </div>
       )
     }
-    else {
-      return null
+
+    if (this.state.show && this.state.asked && !this.state.agree) {
+      return (
+        <div
+          className={styles.test}
+          style={{
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <Heading size={900}>Hey, kids! You are not allowed in here!</Heading>
+        </div>
+      )
     }
+
+    return null
   }
 }
 

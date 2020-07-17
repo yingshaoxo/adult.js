@@ -1,7 +1,7 @@
-import { ExampleComponent } from '.'
+import { ChildGuard } from '.'
 
-describe('ExampleComponent', () => {
+describe('ChildGuard', () => {
   it('is truthy', () => {
-    expect(ExampleComponent).toBeTruthy()
+    expect(ChildGuard).toBeTruthy()
   })
 })
