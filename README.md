@@ -18,20 +18,28 @@ yarn add adult.js
 ```js
 import { ChildGuard } from 'adult.js'
 
-const App = () => {
+function App() {
   return (
-    <ChildGuard
-      weights_path="/weights"
-      show={true}
-      callback_function={(adult, age)=>{
-        if (adult) {
-          console.log(`You are adult, your age is ${age}`)
-        } else {
-          console.log(`You are not adult, your age is ${age}`)
-        }
-      }}
-    />
-  )
+    <div>
+
+      <ChildGuard
+        weights_path="/weights"
+        show={true}
+        callback_function={(adult, age) => {
+          if (adult) {
+            console.log(`You are adult, your age is ${age}`)
+          } else {
+            console.log(`You are not adult, your age is ${age}`)
+          }
+        }}
+      />
+
+      <div className="App">
+        Welcome!
+      </div>
+
+    </div>
+  );
 }
 ```
 
