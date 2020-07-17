@@ -1,58 +1,35 @@
 import * as React from 'react'
 import styles from './styles.module.css'
 import * as faceapi from 'face-api.js';
+import Webcam from 'react-webcam';
 
-interface MirrorProps {
-  handle_video_element: (video_element: HTMLVideoElement, canvas_element: HTMLCanvasElement) => void
+
+
+interface WebcamProps {
+  webcamRef: React.RefObject<Webcam & HTMLVideoElement>
+  handle_video_element: () => void
 }
-interface MirrorState {
-};
 
-class Mirror extends React.Component<MirrorProps, MirrorState> {
-  video_reference: HTMLVideoElement | null = null
-  canvas_reference: HTMLCanvasElement
-  set_video_reference = (element: HTMLVideoElement) => {
-    this.video_reference = element
+class WebcamCapture extends React.Component<WebcamProps> {
+  componentDidMount() {
+    this.props.handle_video_element()
   }
-  set_canvas_reference = (element: HTMLCanvasElement) => {
-    this.canvas_reference = element
-  }
-  async componentDidMount() {
-    if (this.video_reference) {
-      let video_stream: MediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false })
-      this.video_reference.srcObject = video_stream
-      this.props.handle_video_element(this.video_reference, this.canvas_reference)
-    }
-  }
+
   render() {
+    const videoConstraints = {
+      width: 1280,
+      height: 720,
+      facingMode: "user"
+    };
+
     return (
-      <div>
-        <video
-          ref={this.set_video_reference}
-          id="player"
-          autoPlay
-          width="400"
-          height="400"
-          style={{
-            position: "absolute"
-          }}
-        >
-        </video>
-        <canvas
-          ref={this.set_canvas_reference}
-          id="canvas"
-          width="400"
-          height="400"
-          style={{
-            position: "absolute",
-          }}
-        >
-        </canvas>
-      </div>
+      <Webcam
+        ref={this.props.webcamRef}
+        videoConstraints={videoConstraints}
+      />
     )
   }
 }
-
 
 interface Props {
   weights_path: string
@@ -62,6 +39,7 @@ interface Props {
 interface State {
   weights_path: string
   show: boolean
+  webcamRef: React.RefObject<Webcam & HTMLVideoElement>
 }
 
 class ChildGuard extends React.Component<Props, State> {
@@ -70,31 +48,34 @@ class ChildGuard extends React.Component<Props, State> {
     // Don't call this.setState() here!
     this.state = {
       weights_path: props.weights_path,
-      show: props.show
+      show: props.show,
+      webcamRef: React.createRef<Webcam & HTMLVideoElement>(),
     };
-    this.handle_video_element = this.handle_video_element.bind(this);
+    this.handle_video_element = this.handle_video_element.bind(this)
+    this.detection = this.detection.bind(this)
   }
 
-  async handle_video_element(video_element: HTMLVideoElement, canvas_element: HTMLCanvasElement) {
-    await faceapi.nets.ssdMobilenetv1.loadFromUri(this.state.weights_path)
+  async detection() {
+      const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 320 })
+      const blob = this.state.webcamRef?.current?.getScreenshot()
+      //console.log(blob)
+      if (blob) {
+        const img = await faceapi.fetchImage(blob);
+        const detections = await faceapi.detectSingleFace(img, options).withAgeAndGender()
+        console.log(detections)
+      }
+
+      setTimeout(async () => {
+        this.detection()
+      }, 1500)
+  }
+
+  async handle_video_element() {
+    await faceapi.nets.tinyFaceDetector.loadFromUri(this.state.weights_path)
+    await faceapi.nets.ageGenderNet.loadFromUri(this.state.weights_path)
     console.log("faceapi loaded.")
 
-    // for resizing the overlay canvas to the video dimensions
-    const displaySize = { width: video_element.width, height: video_element.height }
-    console.log(video_element.height)
-    faceapi.matchDimensions(canvas_element, displaySize)
-    console.log("canvas resized.")
-
-    const detections = await faceapi.detectSingleFace(video_element).withFaceLandmarks().withAgeAndGender()
-    console.log("stucked?")
-    if (detections) {
-      console.log("working...")
-      const resizedDetections = faceapi.resizeResults(detections, displaySize)
-      faceapi.draw.drawDetections(canvas_element, resizedDetections)
-      faceapi.draw.drawFaceLandmarks(canvas_element, resizedDetections)
-    } else {
-      console.log("undefine...")
-    }
+    this.detection()
   }
 
   render() {
@@ -103,9 +84,10 @@ class ChildGuard extends React.Component<Props, State> {
         <div
           className={styles.test}
         >
-          <Mirror
+          <WebcamCapture
+            webcamRef={this.state.webcamRef}
             handle_video_element={this.handle_video_element}
-          ></Mirror>
+          ></WebcamCapture>
         </div>
         :
         null
