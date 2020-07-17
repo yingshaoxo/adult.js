@@ -1,10 +1,22 @@
 import React from 'react'
 
-import { ExampleComponent } from 'adult.js'
+import { ChildGuard } from 'adult.js'
 import 'adult.js/dist/index.css'
 
 const App = () => {
-  return <ExampleComponent text="Create React Library Example 😄" />
+  return (
+    <ChildGuard
+      weights_path="/weights"
+      show={true}
+      callback_function={(adult, age)=>{
+        if (adult) {
+          console.log(`You are adult, your age is ${age}`)
+        } else {
+          console.log(`You are not adult, your age is ${age}`)
+        }
+      }}
+    />
+  )
 }
 
 export default App
